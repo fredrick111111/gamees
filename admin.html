@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans p-6">
+    <div class="max-w-4xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+            <h1 class="text-2xl font-black text-amber-400">⚙️ Jopo la Utawala (Admin Panel)</h1>
+            <a href="index.html" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm font-semibold">Nenda kwenye Duka ➔</a>
+        </div>
+
+        <!-- Sehemu ya 1: Kuongeza Mchezo Mpya kwenda kwenye Database -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-white">1. Pakia Mchezo Mpya kwenye Duka</h2>
+            <form id="addGameForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Jina la Mchezo</label>
+                    <input type="text" id="game-title" required placeholder="Mfano: FIFA 2026 Pro" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Bei ya Mchezo</label>
+                    <input type="text" id="game-price" required placeholder="Mfano: TZS 10,000" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Maelezo Mafupi</label>
+                    <textarea id="game-desc" rows="3" required placeholder="Eleza kwa ufupi kuhusu mchezo..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white text-sm"></textarea>
+                </div>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-3 rounded-xl text-sm transition">Weka Mchezo Kwenye Duka</button>
+            </form>
+            <p id="admin-msg" class="text-sm font-medium"></p>
+        </div>
+
+        <!-- Sehemu ya 2: Kuzalisha Kodi za Leseni (License Generator) -->
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-white">2. Tengeneza Kodi ya Kipekee ya Kupakua (Activation Code)</h2>
+            <p class="text-xs text-slate-400">Mtumie mteja kodi hii baada ya yeye kulipia kwenda namba yako ya Vodacom <strong>0790016374</strong>.</p>
+            
+            <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center space-y-2">
+                <p id="admin-generated-code" class="text-2xl font-black text-emerald-400 tracking-wider">GV-XXXX-2026</p>
+            </div>
+
+            <button onclick="generateAdminCode()" class="bg-amber-600 hover:bg-amber-500 text-white font-semibold px-6 py-3 rounded-xl text-sm transition">Zalisha Kodi Mpya</button>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT YA ADMIN -->
+    <script>
+        // 1. Kuongeza Mchezo kupitia Backend kuingia Database ya MySQL
+        const addGameForm = document.getElementById('addGameForm');
+        addGameForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('game-title').value.trim();
+            const price = document.getElementById('game-price').value.trim();
+            const description = document.getElementById('game-desc').value.trim();
+            const msg = document.getElementById('admin-msg');
+
+            try {
+                const response = await fetch('http://localhost:5000/api/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, price, description })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    msg.style.color = '#34d399';
+                    msg.textContent = 'Mchezo umeanza kuonekana kwenye duka kwa mafanikio!';
+                    addGameForm.reset();
+                } else {
+                    msg.style.color = '#f87171';
+                    msg.textContent = 'Imeshindikana kuongeza mchezo.';
+                }
+            } catch (err) {
+                console.error(err);
+                msg.style.color = '#f87171';
+                msg.textContent = 'Hitilafu ya seva (Server Error).';
+            }
+        });
+
+        // 2. Kuzalisha Kodi za Leseni
+        function generateAdminCode() {
+            const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+            const newCode = `GV-${randomPart}`;
+            
+            document.getElementById('admin-generated-code').textContent = newCode;
+
+            // Hifadhi kwenye LocalStorage ili zitumike kwenye duka kuu
+            let validLicenses = JSON.parse(localStorage.getItem('gamevault_licenses') || '[]');
+            validLicenses.push({ code: newCode, used: false });
+            localStorage.setItem('gamevault_licenses', JSON.stringify(validLicenses));
+        }
+    </script>
+</body>
+</html>

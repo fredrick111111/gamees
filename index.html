@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GameVault Store - Duka Rasmi</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .game-card:hover {
+            transform: translateY(-4px);
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-black tracking-wider text-indigo-400">GAME<span class="text-white">VAULT</span></span>
+            </div>
+            
+            <nav id="nav-menu" class="flex items-center space-x-6">
+                <a href="#store-section" class="text-slate-300 hover:text-indigo-400 transition text-sm font-medium">Maktaba ya Magemu</a>
+                <button id="admin-nav-btn" onclick="openAdminDashboard()" class="hidden text-amber-400 hover:text-amber-300 transition text-xs font-bold bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-xl">⚙️ Jopo la Admin</button>
+                <div id="auth-nav-item">
+                    <button onclick="switchAuthTab('login')" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition shadow-md shadow-indigo-600/30">Ingia / Jisajili</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="container mx-auto px-6 py-8 flex-grow space-y-12">
+
+        <!-- USER PROFILE SECTION -->
+        <section id="user-dashboard-section" class="hidden bg-gradient-to-r from-indigo-950/60 via-slate-900 to-slate-900 border border-indigo-500/30 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
+                <div class="flex items-center space-x-5">
+                    <div id="profile-avatar" class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-indigo-600/40">
+                        U
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-3">
+                            <h2 class="text-2xl font-bold text-white" id="profile-username">Mtumiaji</h2>
+                            <span id="profile-badge" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full">Akaunti Hai ✓</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mt-1" id="profile-email">email@example.com</p>
+                        <p class="text-indigo-300 text-xs mt-1 font-medium flex items-center space-x-1">
+                            <span>📞 Namba ya Simu:</span> 
+                            <span id="profile-phone" class="text-white font-semibold">-</span>
+                        </p>
+                    </div>
+                </div>
+                <button onclick="logoutUser()" class="bg-rose-500/10 border border-rose-500/30 hover:bg-rose-600 text-rose-400 hover:text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition duration-200 shadow-sm">
+                    Toka kwenye Akaunti (Logout)
+                </button>
+            </div>
+        </section>
+
+        <!-- STORE SECTION -->
+        <section id="store-section" class="space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-800 pb-4 gap-2">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-100">Magemu Yanayopatikana</h2>
+                    <p class="text-slate-400 text-sm">Chagua mchezo, lipia kupitia Vodacom M-Pesa (<strong>0790016374</strong>), kisha ingiza kodi yako maalum ya mchezo huo</p>
+                </div>
+            </div>
+
+            <div id="games-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl text-center col-span-full">
+                    <p class="text-slate-400 animate-pulse text-sm">Inapakia magemu...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- AUTH SECTION -->
+        <section id="auth-container-section" class="max-w-md mx-auto bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl relative">
+            <div class="flex border-b border-slate-800 pb-4 mb-6">
+                <button onclick="switchAuthTab('login')" id="tab-login-btn" class="flex-1 text-center font-bold text-sm pb-2 text-indigo-400 border-b-2 border-indigo-500 transition">Ingia (Login)</button>
+                <button onclick="switchAuthTab('register')" id="tab-register-btn" class="flex-1 text-center font-bold text-sm pb-2 text-slate-400 hover:text-slate-200 transition">Jisajili (Register)</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <form id="loginForm" class="space-y-4">
+                <div class="text-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Karibu Tena</h2>
+                    <p class="text-slate-400 text-xs mt-1">Ingiza barua pepe na nenosiri lako</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Barua Pepe (Email)</label>
+                    <input type="email" id="login-email" required placeholder="mchezaji@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Nenosiri (Password)</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3.5 rounded-xl transition shadow-lg shadow-indigo-600/30 text-sm mt-2">
+                    Ingia Sasa
+                </button>
+                <p id="login-message" class="mt-3 text-center text-sm font-medium"></p>
+            </form>
+
+            <!-- REGISTER FORM -->
+            <form id="registerForm" class="space-y-4 hidden">
+                <div class="text-center mb-4">
+                    <h2 class="text-xl font-bold text-white">Fungua Akaunti Mpya</h2>
+                    <p class="text-slate-400 text-xs mt-1">Jaza taarifa zako kwa usahihi</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Jina la Mtumiaji</label>
+                    <input type="text" id="reg-username" required placeholder="Jina Lako" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Barua Pepe</label>
+                    <input type="email" id="reg-email" required placeholder="mchezaji@example.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Namba ya Simu</label>
+                    <input type="text" id="reg-phone" required placeholder="0712345678" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Nenosiri</label>
+                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 transition text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3.5 rounded-xl transition shadow-lg shadow-emerald-600/20 text-sm mt-2">
+                    Fungua Akaunti Sasa
+                </button>
+                <p id="reg-message" class="mt-3 text-center text-sm font-medium"></p>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- ADMIN DASHBOARD MODAL -->
+    <div id="admin-dashboard-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div class="bg-slate-900 border border-amber-500/50 max-w-2xl w-full p-8 rounded-3xl shadow-2xl space-y-8 my-8">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h2 class="text-xl font-black text-amber-400">⚙️ Jopo la Utawala (Admin Panel)</h2>
+                <button onclick="closeAdminDashboard()" class="bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-600 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition">Funga Admin ✕</button>
+            </div>
+
+            <!-- Sehemu ya 1: Kuongeza Mchezo -->
+            <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <h3 class="text-base font-bold text-white">1. Weka Mchezo Mpya & Faili kutoka PC</h3>
+                <form id="adminAddGameForm" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Jina la Mchezo</label>
+                        <input type="text" id="admin-game-title" required placeholder="Mfano: TikTok Live Studio" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Bei ya Mchezo</label>
+                        <input type="text" id="admin-game-price" required placeholder="Mfano: TZS 5,000" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Maelezo Mafupi</label>
+                        <textarea id="admin-game-desc" rows="2" required placeholder="Maelezo ya mchezo..." class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Picha ya Mchezo (Kutoka PC)</label>
+                        <input type="file" id="admin-game-image" accept="image/*" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Faili la Mchezo (ZIP / APK / Setup kutoka PC)</label>
+                        <input type="file" id="admin-game-file" required class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
+                    </div>
+
+                    <!-- PROGRESS BAR -->
+                    <div id="progress-container" class="hidden space-y-2 pt-2">
+                        <div class="flex justify-between text-xs text-indigo-300 font-bold">
+                            <span id="progress-status">Inapakia faili...</span>
+                            <span id="progress-percent">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-900 rounded-full h-3.5 overflow-hidden border border-slate-800">
+                            <div id="progress-bar-fill" class="bg-indigo-600 h-full w-0 transition-all duration-150"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl text-sm transition shadow-md">Weka Mchezo Kwenye Duka</button>
+                </form>
+                <p id="admin-game-msg" class="text-xs font-medium text-center pt-1"></p>
+            </div>
+
+            <!-- Sehemu ya 2: Kuzalisha Kodi Maalum kwa Kila Mchezo -->
+            <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <h3 class="text-base font-bold text-white">2. Tengeneza Kodi Maalum ya Mchezo Huu</h3>
+                <p class="text-xs text-slate-400">Chagua mchezo unaotaka kumtengezea mteja kodi ya kipekee baada ya yeye kulipia.</p>
+                
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Chagua Mchezo</label>
+                    <select id="admin-select-game" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-white text-sm">
+                        <!-- Inajazwa na JavaScript -->
+                    </select>
+                </div>
+
+                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 text-center">
+                    <p id="admin-generated-code" class="text-2xl font-black text-emerald-400 tracking-wider">CHAGUA MCHEZO</p>
+                </div>
+
+                <button onclick="generateSpecificCode()" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 rounded-xl text-sm transition shadow-md">Zalisha Kodi ya Mchezo Huu</button>
+                <p id="admin-code-msg" class="text-xs text-center font-medium"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="payment-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-slate-900 border border-slate-800 max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-5 relative">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-white">💳 Nunua Leseni ya Mchezo</h3>
+                <button onclick="closePaymentModal()" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+            </div>
+
+            <div class="space-y-3">
+                <div class="bg-slate-950 p-4 rounded-2xl border border-slate-800 space-y-1">
+                    <p class="text-xs text-slate-400">Mchezo Unaonunua:</p>
+                    <p id="pay-game-title" class="text-indigo-400 font-bold text-base">-</p>
+                    <p class="text-xs text-slate-400 pt-2">Bei:</p>
+                    <p id="pay-game-price" class="text-emerald-400 font-bold text-lg">-</p>
+                </div>
+
+                <div class="bg-indigo-950/40 border border-indigo-500/30 p-4 rounded-2xl space-y-2">
+                    <p class="text-xs font-bold text-indigo-300 uppercase tracking-wider">Hatua za Kulipa:</p>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        1. Tuma pesa kupitia Vodacom M-Pesa kwenda namba:<br>
+                        <strong class="text-white text-base text-emerald-400">0790016374</strong><br>
+                        2. Baada ya kulipa, wasiliana na mmiliki ili akutumie kodi maalum ya mchezo huu.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Ingiza Kodi Maalum ya Mchezo Huu</label>
+                    <input type="text" id="license-code-input" placeholder="GV-XXXX-2026" class="w-full bg-slate-950 border border-indigo-500/50 rounded-xl p-3 text-white text-center text-base tracking-widest uppercase focus:outline-none focus:border-indigo-400">
+                    <p id="code-error-msg" class="text-rose-400 text-xs mt-1.5 font-medium"></p>
+                </div>
+            </div>
+
+            <div class="flex space-x-3 pt-2">
+                <button onclick="verifyAndDownload()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition text-sm shadow-lg shadow-emerald-600/20">
+                    Thibitisha na Pakua
+                </button>
+                <button onclick="closePaymentModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-3 rounded-xl transition text-sm">
+                    Ghairi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-8 text-center text-slate-500 text-xs mt-12">
+        <p>&copy; 2026 GameVault Store. Haki zote zimehifadhiwa.</p>
+    </footer>
+
+    <!-- JAVASCRIPT CODE -->
+    <script>
+        let currentSelectedGameId = null;
+        let currentSelectedGameTitle = '';
+        let currentSelectedPrice = '';
+        let currentFilePath = '';
+
+        const ADMIN_EMAIL = "Fredofredo162005@gmail.com";
+        const ADMIN_PHONE = "0790016374";
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadGamesFromDatabase();
+            checkExistingSession();
+        });
+
+        function switchAuthTab(type) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginBtn = document.getElementById('tab-login-btn');
+            const registerBtn = document.getElementById('tab-register-btn');
+
+            if (type === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginBtn.className = "flex-1 text-center font-bold text-sm pb-2 text-indigo-400 border-b-2 border-indigo-500 transition";
+                registerBtn.className = "flex-1 text-center font-bold text-sm pb-2 text-slate-400 hover:text-slate-200 transition";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                registerBtn.className = "flex-1 text-center font-bold text-sm pb-2 text-indigo-400 border-b-2 border-indigo-500 transition";
+                loginBtn.className = "flex-1 text-center font-bold text-sm pb-2 text-slate-400 hover:text-slate-200 transition";
+            }
+        }
+
+        // Vuta magemu na ujaze kwenye duka pamoja na kwenye kisanduku cha Admin
+        function loadGamesFromDatabase() {
+            fetch('http://localhost:5000/api/games')
+                .then(res => res.json())
+                .then(data => {
+                    const container = document.getElementById('games-container');
+                    const adminSelect = document.getElementById('admin-select-game');
+                    
+                    if (container) {
+                        container.innerHTML = '';
+                        adminSelect.innerHTML = '<option value="">-- Chagua Mchezo --</option>';
+
+                        if (!data || data.length === 0) {
+                            container.innerHTML = '<p class="text-slate-500 italic col-span-full">Hakuna magemu yaliyopatikana bado.</p>';
+                            return;
+                        }
+
+                        data.forEach(game => {
+                            const gameImage = game.image_url ? `http://localhost:5000${game.image_url}` : 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500';
+                            
+                            // Ongeza kwenye duka
+                            container.innerHTML += `
+                                <div class="game-card bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl flex flex-col justify-between">
+                                    <div>
+                                        <div class="h-48 w-full overflow-hidden bg-slate-950 relative">
+                                            <img src="${gameImage}" alt="${game.title}" class="w-full h-full object-cover">
+                                            <span class="absolute top-3 right-3 bg-indigo-600/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">${game.price}</span>
+                                        </div>
+                                        <div class="p-6">
+                                            <h3 class="text-xl font-bold text-white tracking-wide mb-2">${game.title}</h3>
+                                            <p class="text-slate-400 text-sm leading-relaxed">${game.description || 'Hakuna maelezo.'}</p>
+                                        </div>
+                                    </div>
+                                    <div class="p-6 pt-0">
+                                        <button onclick="openPaymentModal(${game.id}, '${game.title.replace(/'/g, "\\'")}', '${game.price}', '${game.file_path || ''}')" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition text-sm shadow-md shadow-indigo-600/20 flex items-center justify-center space-x-2">
+                                            <span>Nunua na Pakua Mchezo</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+
+                            // Ongeza kwenye dropdown ya Admin
+                            adminSelect.innerHTML += `<option value="${game.id}">${game.title} (${game.price})</option>`;
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error('Hitilafu:', err);
+                });
+        }
+
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const username = document.getElementById('reg-username').value.trim();
+                const email = document.getElementById('reg-email').value.trim();
+                const phone = document.getElementById('reg-phone').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const messageP = document.getElementById('reg-message');
+
+                try {
+                    const response = await fetch('http://localhost:5000/api/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, email, phone, password })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        messageP.style.color = '#34d399';
+                        messageP.textContent = 'Akaunti imefunguliwa! Sasa unaweza kuingia.';
+                        setTimeout(() => switchAuthTab('login'), 1500);
+                    } else {
+                        messageP.style.color = '#f87171';
+                        messageP.textContent = result.message;
+                    }
+                } catch (err) {
+                    messageP.style.color = '#f87171';
+                    messageP.textContent = 'Hitilafu ya seva.';
+                }
+            });
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value.trim();
+                const messageP = document.getElementById('login-message');
+
+                if (email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+                    const adminUser = { username: "Fredo2005", email: ADMIN_EMAIL, phone: ADMIN_PHONE };
+                    localStorage.setItem('gamevault_user', JSON.stringify(adminUser));
+                    messageP.style.color = '#34d399';
+                    messageP.textContent = 'Karibu tena, Admin Mkuu!';
+                    setTimeout(() => renderDashboard(adminUser), 800);
+                    return;
+                }
+
+                const userData = { username: email.split('@')[0], email: email, phone: '07XXXXXXXX' };
+                localStorage.setItem('gamevault_user', JSON.stringify(userData));
+                messageP.style.color = '#34d399';
+                messageP.textContent = 'Umeingia kwenye akaunti yako!';
+                setTimeout(() => renderDashboard(userData), 800);
+            });
+        }
+
+        function checkExistingSession() {
+            const savedUser = localStorage.getItem('gamevault_user');
+            if (savedUser) renderDashboard(JSON.parse(savedUser));
+        }
+
+        function renderDashboard(user) {
+            document.getElementById('auth-container-section').classList.add('hidden');
+            document.getElementById('user-dashboard-section').classList.remove('hidden');
+            document.getElementById('profile-username').textContent = user.username;
+            document.getElementById('profile-email').textContent = user.email;
+            document.getElementById('profile-phone').textContent = user.phone || 'Haikuwekwa';
+            document.getElementById('profile-avatar').textContent = user.username.charAt(0).toUpperCase();
+
+            if (user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() || user.phone === ADMIN_PHONE) {
+                document.getElementById('admin-nav-btn').classList.remove('hidden');
+                document.getElementById('profile-badge').textContent = 'Admin Mkuu 👑';
+                document.getElementById('profile-badge').className = 'bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-bold px-2.5 py-0.5 rounded-full';
+            }
+
+            document.getElementById('auth-nav-item').innerHTML = `<span class="text-indigo-400 font-bold text-sm bg-indigo-950 px-4 py-2 rounded-xl border border-indigo-800/50">Karibu, ${user.username}</span>`;
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('gamevault_user');
+            location.reload();
+        }
+
+        function openAdminDashboard() {
+            document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+        }
+
+        function closeAdminDashboard() {
+            document.getElementById('admin-dashboard-modal').classList.add('hidden');
+        }
+
+        // Admin: Kutengeneza kodi maalum ya mchezo uliotajwa (Imesahihishwa kikamilifu)
+        async function generateSpecificCode() {
+            const gameSelect = document.getElementById('admin-select-game');
+            const gameId = gameSelect.value;
+            const codeDisplay = document.getElementById('admin-generated-code');
+            const msg = document.getElementById('admin-code-msg');
+
+            if (!gameId || gameId === "") {
+                msg.style.color = '#f87171';
+                msg.textContent = 'Tafadhali chagua mchezo kutoka kwenye orodha kwanza!';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/generate-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game_id: gameId })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    codeDisplay.textContent = result.code;
+                    msg.style.color = '#34d399';
+                    msg.textContent = 'Kodi maalum imezalishwa kikamilifu kwa mchezo huu!';
+                } else {
+                    msg.style.color = '#f87171';
+                    msg.textContent = result.message || 'Imeshindikana kuzalisha kodi.';
+                }
+            } catch (err) {
+                console.error(err);
+                msg.style.color = '#f87171';
+                msg.textContent = 'Hitilafu ya seva (Server Error).';
+            }
+        }
+
+        // Admin: Kuongeza Mchezo Mpya
+        const adminAddGameForm = document.getElementById('adminAddGameForm');
+        adminAddGameForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('admin-game-title').value.trim();
+            const price = document.getElementById('admin-game-price').value.trim();
+            const description = document.getElementById('admin-game-desc').value.trim();
+            const imageFile = document.getElementById('admin-game-image').files[0];
+            const gameFile = document.getElementById('admin-game-file').files[0];
+            const msg = document.getElementById('admin-game-msg');
+
+            const progressContainer = document.getElementById('progress-container');
+            const progressBarFill = document.getElementById('progress-bar-fill');
+            const progressPercent = document.getElementById('progress-percent');
+            const progressStatus = document.getElementById('progress-status');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('price', price);
+            formData.append('description', description);
+            if (imageFile) formData.append('gameImage', imageFile);
+            if (gameFile) formData.append('gameFile', gameFile);
+
+            progressContainer.classList.remove('hidden');
+            uploadBtn.disabled = true;
+            uploadBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:5000/api/games', true);
+
+            xhr.upload.onprogress = function(e) {
+                if (e.lengthComputable) {
+                    const percentComplete = Math.round((e.loaded / e.total) * 100);
+                    progressBarFill.style.width = percentComplete + '%';
+                    progressPercent.textContent = percentComplete + '%';
+                    progressStatus.textContent = percentComplete < 100 ? 'Inapakia faili...' : 'Inahifadhi kwenye database...';
+                }
+            };
+
+            xhr.onload = function() {
+                uploadBtn.disabled = false;
+                uploadBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+
+                if (xhr.status === 200) {
+                    const result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+                        msg.style.color = '#34d399';
+                        msg.textContent = 'Mchezo umehifadhiwa kikamilifu!';
+                        adminAddGameForm.reset();
+                        loadGamesFromDatabase();
+                        setTimeout(() => {
+                            progressContainer.classList.add('hidden');
+                            progressBarFill.style.width = '0%';
+                            msg.textContent = '';
+                            closeAdminDashboard();
+                        }, 1500);
+                    } else {
+                        msg.style.color = '#f87171';
+                        msg.textContent = result.message;
+                    }
+                } else {
+                    msg.style.color = '#f87171';
+                    msg.textContent = 'Hitilafu ya seva.';
+                }
+            };
+
+            xhr.send(formData);
+        });
+
+        function openPaymentModal(gameId, gameTitle, gamePrice, filePath) {
+            if (!localStorage.getItem('gamevault_user')) {
+                alert('Tafadhali ingia kwenye akaunti yako kwanza kabla ya kununua mchezo!');
+                window.location.href = '#auth-container-section';
+                return;
+            }
+            currentSelectedGameId = gameId;
+            currentSelectedGameTitle = gameTitle;
+            currentSelectedPrice = gamePrice;
+            currentFilePath = filePath;
+
+            document.getElementById('pay-game-title').textContent = gameTitle;
+            document.getElementById('pay-game-price').textContent = gamePrice;
+            document.getElementById('license-code-input').value = '';
+            document.getElementById('code-error-msg').textContent = '';
+            document.getElementById('payment-modal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            document.getElementById('payment-modal').classList.add('hidden');
+        }
+
+        // Kudhibitisha kodi maalum na kuanzisha upakuaji
+        async function verifyAndDownload() {
+            const inputCode = document.getElementById('license-code-input').value.trim().toUpperCase();
+            const errorMsg = document.getElementById('code-error-msg');
+
+            if (!inputCode) {
+                errorMsg.textContent = 'Tafadhali ingiza kodi yako maalum!';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:5000/api/verify-license', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game_id: currentSelectedGameId, license_code: inputCode })
+                });
+                const result = await response.json();
+
+                if (!result.success) {
+                    errorMsg.textContent = result.message;
+                    return;
+                }
+
+                closePaymentModal();
+                alert('Kodi imethibitishwa kwa mafanikio! Upakuaji wa mchezo unaanza sasa.');
+
+                if (currentFilePath) {
+                    const a = document.createElement('a');
+                    a.href = `http://localhost:5000${currentFilePath}`;
+                    a.download = '';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } else {
+                    alert('Samahani, faili la mchezo halipatikani kwenye seva.');
+                }
+            } catch (err) {
+                errorMsg.textContent = 'Hitilafu ya kuwasiliana na seva.';
+            }
+        }
+    </script>
+</body>
+</html>
